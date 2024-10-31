@@ -24,7 +24,7 @@ export async function GET() {
       {
         url:
           config?.url ||
-          "https://project-proposal-bitte-agent-n2sqysr46.vercel.app/",
+          "https://project-proposal-bitte-agent.vercel.app/",
       },
     ],
     "x-mb": {
