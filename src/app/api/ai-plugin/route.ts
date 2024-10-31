@@ -717,7 +717,7 @@ export async function GET() {
         {
           get: {
             description:
-              "Create a detailed project with specified details and links.",
+              "Create a project with specified details and links.",
             tags: ["create project"],
             operationId: "createProject",
             parameters: [
