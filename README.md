@@ -23,17 +23,17 @@ Facilitates the creation and submission of projects and proposals for various sp
 
 **Create DevHub Proposal**
 
-- **Endpoint:** `/api/post/devhub/:title/:description/:category/:summary/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor`
+- **Endpoint:** `/api/get/transaction/devhub/:title/:description/:category/:summary/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor`
 - **Description:** Create a proposal to apply for sponsorship through the devhub.
 
 **Create Events Proposal**
 
-- **Endpoint:** `/api/post/events/:title/:description/:category/:summary/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor`
+- **Endpoint:** `/api/get/transaction/events/:title/:description/:category/:summary/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor`
 - **Description:** Create a proposal for events sponsorship.
 
 **Create Infrastructure Proposal**
 
-- **Endpoint:** `/api/post/infrastructure/:title/:description/:category/:summary/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor`
+- **Endpoint:** `/api/get/transaction/infrastructure/:title/:description/:category/:summary/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor`
 - **Description:** Create a proposal for infrastructure sponsorship.
 
 **Create Project**
@@ -43,7 +43,7 @@ Facilitates the creation and submission of projects and proposals for various sp
 
 **Create NEAR Catalogue Project**
 
-- **Endpoint:** `/api/post/nearcatalog/:title/:description/:categories/:oneliner/:logo/:website/:dapp/:twitter/:medium/:discord/:whitepaper`
+- **Endpoint:** `/api/get/transaction/nearcatalog/:title/:description/:categories/:oneliner/:logo/:website/:dapp/:twitter/:medium/:discord/:whitepaper`
 - **Description:** Create a NEAR catalogue project entry.
 
 ## Getting Started

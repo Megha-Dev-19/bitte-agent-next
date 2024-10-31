@@ -22,7 +22,7 @@ export default function Home() {
         </li>
         <li>
           <a
-            href="https://github.com/Mintbase/ref-finance-agent-next"
+            href="https://github.com/Megha-Dev-19/project-proposal-bitte-agent"
             target="_blank"
             rel="noreferrer"
           >

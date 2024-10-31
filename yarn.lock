@@ -2737,10 +2737,10 @@ lru_map@0.4.1:
   resolved "https://registry.yarnpkg.com/lru_map/-/lru_map-0.4.1.tgz#f7b4046283c79fb7370c36f8fca6aee4324b0a98"
   integrity sha512-I+lBvqMMFfqaV8CJCISjI3wbjmwVu/VyOoU7+qtu9d7ioW5klMgsTTiUOUp+DJvfTTzKXoPbyC6YfgkNcyPSOg==
 
-make-agent@^0.0.16:
-  version "0.0.16"
-  resolved "https://registry.yarnpkg.com/make-agent/-/make-agent-0.0.16.tgz#c7d2c20f2e58ca2f2e753d2b20aaaa25b0409612"
-  integrity sha512-HbG4XQRkzi+IglL5MO2KHaJhorSoNgyarjxP0+RUAZk5mzK5KPZQ9ngTn+8W9lDKJzZf5oQc66Grur2r/x/qCw==
+make-agent@^0.0.23:
+  version "0.0.23"
+  resolved "https://registry.yarnpkg.com/make-agent/-/make-agent-0.0.23.tgz#39b4f95113e2eade30fad1253301556ed92baa63"
+  integrity sha512-EAOrhzJ8BLJmlPlm21FLhLXxFcn1HLj19qbbOGnWlgJ194NsFxdpi3oFnEFh7IJeFPWLT658bS2pRj1a87DvjA==
   dependencies:
     "@apidevtools/swagger-parser" "^10.1.0"
     "@types/node" "^22.7.2"

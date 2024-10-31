@@ -22,11 +22,13 @@ export async function GET() {
     },
     servers: [
       {
-        url: config?.url || DEPLOYMENT_URL,
+        url:
+          config?.url ||
+          "https://project-proposal-bitte-agent-n2sqysr46.vercel.app/",
       },
     ],
     "x-mb": {
-      "account-id": key.accountId || "",
+      "account-id": key.accountId || "megha-bitte.near",
       assistant: {
         name: "Project and Proposal Agent",
         description:
@@ -141,12 +143,13 @@ export async function GET() {
             },
           },
         },
-      "/api/post/devhub/{title}/{description}/{category}/{summary}/{requestedSponsorshipAmount}/{requestedSponsorshipToken}/{receiverAccount}/{supervisor}":
+      "/api/get/transaction/devhub/{title}/{description}/{category}/{summary}/{requestedSponsorshipAmount}/{requestedSponsorshipToken}/{receiverAccount}/{supervisor}":
         {
           get: {
             description:
-              "Submits a proposal with the specified details to the DevHub portal.",
-            operationId: "postOnDevhub",
+              "Creates a NEAR transaction payload to sign by user, it contains a proposal with the specified details to the DevHub portal.",
+            operationId: "getDevhubTransaction",
+            tags: ["Devhub portal"],
             parameters: [
               {
                 name: "title",
@@ -223,7 +226,8 @@ export async function GET() {
             ],
             responses: {
               "200": {
-                description: "Transaction data generated successfully.",
+                description:
+                  "Use this transaction data to call generate-transaction tool to generate a transaction.",
                 content: {
                   "application/json": {
                     schema: {
@@ -326,12 +330,13 @@ export async function GET() {
             },
           },
         },
-      "/api/post/events/{title}/{description}/{category}/{summary}/{requestedSponsorshipAmount}/{requestedSponsorshipToken}/{receiverAccount}/{supervisor}":
+      "/api/get/transaction/events/{title}/{description}/{category}/{summary}/{requestedSponsorshipAmount}/{requestedSponsorshipToken}/{receiverAccount}/{supervisor}":
         {
           get: {
             description:
-              "Submits a proposal to the events portal.",
-            operationId: "postOnEvents",
+              "Creates a NEAR transaction payload to sign by user, it contains a proposal with the specified details to the Events portal.",
+            tags: ["Events portal"],
+            operationId: "getEventsTransaction",
             parameters: [
               {
                 in: "path",
@@ -412,7 +417,8 @@ export async function GET() {
             ],
             responses: {
               "200": {
-                description: "Transaction data generated successfully.",
+                description:
+                  "Use this transaction data to call generate-transaction tool to generate a transaction.",
                 content: {
                   "application/json": {
                     schema: {
@@ -515,12 +521,13 @@ export async function GET() {
             },
           },
         },
-      "/api/post/infrastructure/{title}/{description}/{category}/{summary}/{requestedSponsorshipAmount}/{requestedSponsorshipToken}/{receiverAccount}/{supervisor}":
+      "/api/get/transaction/infrastructure/{title}/{description}/{category}/{summary}/{requestedSponsorshipAmount}/{requestedSponsorshipToken}/{receiverAccount}/{supervisor}":
         {
           get: {
             description:
-              "Submits a proposal to the infrastructure portal.",
-            operationId: "postOnInfrastructure",
+              "Creates a NEAR transaction payload to sign by user, it contains a proposal with the specified details to the Infrastructure portal.",
+            tags: ["Infrastructure portal"],
+            operationId: "getInfrastructureTransaction",
             parameters: [
               {
                 in: "path",
@@ -601,7 +608,8 @@ export async function GET() {
             ],
             responses: {
               "200": {
-                description: "Transaction data generated successfully.",
+                description:
+                  "Use this transaction data to call generate-transaction tool to generate a transaction.",
                 content: {
                   "application/json": {
                     schema: {
@@ -704,10 +712,11 @@ export async function GET() {
             },
           },
         },
-      "/api/post/project/{projectDetails}/{discord}/{medium}/{twitter}/{logo}/{websiteLink}/{whitepaper}":
+      "/api/create/project/{projectDetails}/{discord}/{medium}/{twitter}/{logo}/{websiteLink}/{whitepaper}":
         {
           get: {
-            description: "Create a detailed project with specified details and links.",
+            description:
+              "Create a detailed project with specified details and links.",
             operationId: "createProject",
             parameters: [
               {
@@ -844,12 +853,12 @@ export async function GET() {
             },
           },
         },
-      "/api/post/nearcatalog/{title}/{description}/{categories}/{oneliner}/{logo}/{website}/{twitter}/{medium}/{discord}/{whitepaper}":
+      "/api/get/transaction/nearcatalog/{title}/{description}/{categories}/{oneliner}/{logo}/{website}/{twitter}/{medium}/{discord}/{whitepaper}":
         {
           get: {
-            description:
-              "Post a project to NEAR Catalog.",
-            operationId: "postOnNearCatalog",
+            description: "Post a project to NEAR Catalog.",
+            tags: ["NEAR Catalog"],
+            operationId: "getNearCatalogTransaction",
             parameters: [
               {
                 in: "path",
@@ -945,7 +954,8 @@ export async function GET() {
             ],
             responses: {
               "200": {
-                description: "Transaction data generated successfully.",
+                description:
+                  "Use this transaction data to call generate-transaction tool to generate a transaction.",
                 content: {
                   "application/json": {
                     schema: {

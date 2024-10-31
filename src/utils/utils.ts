@@ -69,9 +69,13 @@ export async function createProposalTransaction(
   requestedSponsor: string,
   contract: string,
 ): Promise<transactions.Transaction> {
-  const mbMetadata = JSON.parse(headers["mb-metadata"] || "{}");
-  const accountId = mbMetadata?.accountData?.accountId || "near";
-  const publicKey = mbMetadata?.accountData?.devicePublicKey || "";
+  const config = JSON.parse(process.env.BITTE_KEY || "{}");
+  const accountId = config.accountId;
+  const publicKey = config?.publicKey || "";
+
+  // const mbMetadata = JSON.parse(headers["mb-metadata"] || "{}");
+  // const accountId = mbMetadata?.accountData?.accountId || "near";
+  // const publicKey = mbMetadata?.accountData?.devicePublicKey || "";
 
   const {
     title,
@@ -82,7 +86,12 @@ export async function createProposalTransaction(
     receiverAccount,
     supervisor,
     category,
-  } = params;
+  } = Object.fromEntries(
+    Object.entries(params).map(([key, value]) => [
+      key,
+      decodeURIComponent(value),
+    ]),
+  );
 
   // Common body structure
   const commonBody = {
@@ -154,9 +163,12 @@ export async function createProject(
   args: any,
   headers: any,
 ): Promise<transactions.Transaction> {
-  const mbMetadata = JSON.parse(headers["mb-metadata"] || "{}");
-  const accountId = mbMetadata?.accountData?.accountId || "near";
-  const publicKey = mbMetadata?.accountData?.devicePublicKey || "";
+  const config = JSON.parse(process.env.BITTE_CONFIG || "{}");
+  const accountId = config.accountId;
+  const publicKey = config?.publicKey || "";
+  // const mbMetadata = JSON.parse(headers["mb-metadata"] || "{}");
+  // const accountId = mbMetadata?.accountData?.accountId || "near";
+  // const publicKey = mbMetadata?.accountData?.devicePublicKey || "";
   const nonce = await fetchNonce(accountId, publicKey);
   const blockDetails = await getBlockDetails();
 

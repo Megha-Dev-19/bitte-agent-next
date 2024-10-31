@@ -78,7 +78,7 @@ const app = new Elysia({ prefix: "/api", aot: false })
     },
   )
   .get(
-    "/post/devhub/:title/:description/:category/:summary/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor",
+    "/get/transaction/devhub/:title/:description/:category/:summary/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor",
     async ({ params, headers }) => {
       const transaction = await createProposalTransaction(
         params,
@@ -86,11 +86,11 @@ const app = new Elysia({ prefix: "/api", aot: false })
         "neardevdao.near",
         "devhub.near",
       );
-      return transaction;
+      return JSON.stringify(transaction);
     },
   )
   .get(
-    "/post/events/:title/:description/:category/:summary/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor",
+    "/get/transaction/events/:title/:description/:category/:summary/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor",
     async ({ params, headers }) => {
       const transaction = await createProposalTransaction(
         params,
@@ -102,7 +102,7 @@ const app = new Elysia({ prefix: "/api", aot: false })
     },
   )
   .get(
-    "/post/infrastructure/:title/:description/:category/:summary/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor",
+    "/get/transaction/infrastructure/:title/:description/:category/:summary/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor",
     async ({ params, headers }) => {
       const transaction = await createProposalTransaction(
         { ...params, linkedRfp: undefined },
@@ -174,6 +174,7 @@ const app = new Elysia({ prefix: "/api", aot: false })
 
         // Check if a complete object was found
         if (completeObject) {
+          console.log(completeObject)
           return {
             discord: completeObject.discord,
             medium: completeObject.medium,
@@ -191,10 +192,12 @@ const app = new Elysia({ prefix: "/api", aot: false })
     },
   )
   .get(
-    "/post/nearcatalog/{title}/{description}/{categories}/{oneliner}/{logo}/{website}/{dapp}/{twitter}/{medium}/{discord}/{whitepaper}",
+    "/get/transaction/nearcatalog/{title}/{description}/{categories}/{oneliner}/{logo}/{website}/{twitter}/{medium}/{discord}/{whitepaper}",
     async ({ params, headers }) => {
-      const mbMetadata = JSON.parse(headers["mb-metadata"] || "{}");
-      const accountId = mbMetadata?.accountData?.accountId || "near";
+      // const mbMetadata = JSON.parse(headers["mb-metadata"] || "{}");
+      // const accountId = mbMetadata?.accountData?.accountId || "near";
+      const config = JSON.parse(process.env.BITTE_KEY || "{}");
+      const accountId = config.accountId;
       const {
         title,
         description,
@@ -206,7 +209,12 @@ const app = new Elysia({ prefix: "/api", aot: false })
         medium,
         discord,
         whitepaper,
-      } = params;
+      } = Object.fromEntries(
+        Object.entries(params).map(([key, value]) => [
+          key,
+          decodeURIComponent(value as any),
+        ]),
+      );
       return await createProject(
         {
           [accountId]: {
