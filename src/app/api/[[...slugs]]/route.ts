@@ -1,126 +1,237 @@
 import { swagger } from "@elysiajs/swagger";
-import {
-  EstimateSwapView,
-  Transaction,
-  WRAP_NEAR_CONTRACT_ID,
-  estimateSwap,
-  fetchAllPools,
-  ftGetTokenMetadata,
-  getExpectedOutputFromSwapTodos,
-  getStablePools,
-  instantSwap,
-  nearDepositTransaction,
-  nearWithdrawTransaction,
-  percentLess,
-  scientificNotationToString,
-  separateRoutes,
-} from "@ref-finance/ref-sdk";
-import Big from "big.js";
 import { Elysia } from "elysia";
-
-import { searchToken } from "@/utils/search-token";
+import axios from "axios";
+import { createProject, createProposalTransaction } from "@/utils/utils";
 
 const app = new Elysia({ prefix: "/api", aot: false })
   .use(swagger())
-  .get("/:token", async ({ params: { token } }) => {
-    const tokenMatch = searchToken(token)[0];
-    if (!tokenMatch) {
-      return {
-        error: `Token ${token} not found`,
-      };
-    }
-    const tokenMetadata = await ftGetTokenMetadata(tokenMatch.id);
-    if (!tokenMetadata) {
-      return {
-        error: `Metadata for token ${token} not found`,
-      };
-    }
+  .get(
+    "/create/proposal/:proposalDetails/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor",
+    async ({ params }) => {
+      const {
+        proposalDetails,
+        requestedSponsorshipAmount,
+        requestedSponsorshipToken,
+        receiverAccount,
+        supervisor,
+      } = params;
 
-    return {
-      ...tokenMetadata,
-      icon: "",
-    };
-  })
-  .get("/swap/:tokenIn/:tokenOut/:quantity", async ({ params: { tokenIn, tokenOut, quantity }, headers }) => {
-    const mbMetadata = JSON.parse(headers["mb-metadata"] || "{}");
-    const accountId = mbMetadata?.accountData?.accountId || "near";
-
-    const { ratedPools, unRatedPools, simplePools } = await fetchAllPools();
-
-    const stablePools = unRatedPools.concat(ratedPools);
-
-    const stablePoolsDetail = await getStablePools(stablePools);
-
-    const tokenInMatch = searchToken(tokenIn)[0];
-    const tokenOutMatch = searchToken(tokenOut)[0];
-
-    if (!tokenInMatch || !tokenOutMatch) {
-      return {
-        error: `Unable to find token(s) tokenInMatch: ${tokenInMatch?.name} tokenOutMatch: ${tokenOutMatch?.name}`,
-      };
-    }
-
-    const [tokenInData, tokenOutData] = await Promise.all([
-      ftGetTokenMetadata(tokenInMatch.id),
-      ftGetTokenMetadata(tokenOutMatch.id),
-    ]);
-
-    if (tokenInData.id === tokenOutData.id) {
-      if (tokenInData.id === WRAP_NEAR_CONTRACT_ID) {
-        return { error: "This endpoint does not support wrapping / unwrap NEAR directly" };
-      }
-      return { error: "TokenIn and TokenOut cannot be the same" };
-    }
-
-    const refEstimateSwap = (enableSmartRouting: boolean) => {
-      return estimateSwap({
-        tokenIn: tokenInData,
-        tokenOut: tokenOutData,
-        amountIn: quantity,
-        simplePools,
-        options: {
-          enableSmartRouting,
-          stablePools,
-          stablePoolsDetail,
+      const requestData = {
+        inputs: {
+          Supervisor: supervisor,
+          "Requested Sponsorship Amount": requestedSponsorshipAmount,
+          Receiver: receiverAccount,
+          "Requested Sponsorship Token": requestedSponsorshipToken,
+          "Proposal Details": proposalDetails,
         },
-      });
-    };
+        version: "^2.0",
+      };
+      try {
+        const response = await axios.post(
+          "https://app.wordware.ai/api/released-app/9be6bbf8-6964-4430-97b8-a71b1a3aab76/run",
+          requestData,
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.WORDWARE_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+        const rawData = response.data;
 
-    const swapTodos: EstimateSwapView[] = await refEstimateSwap(true).catch(() => {
-      return refEstimateSwap(false); // fallback to non-smart routing if unsupported
-    });
+        // Split the response into lines and filter out empty lines
+        const lines = rawData.split("\n").filter((line: any) => line.trim());
+        let completeObject = null;
 
-    const transactionsRef: Transaction[] = await instantSwap({
-      tokenIn: tokenInData,
-      tokenOut: tokenOutData,
-      amountIn: quantity,
-      swapTodos,
-      slippageTolerance: 0.1,
-      AccountId: accountId,
-      referralId: "mintbase.near",
-    });
+        // Parse each line
+        for (const line of lines) {
+          try {
+            const parsedChunk = JSON.parse(line);
+            if (
+              parsedChunk.type === "chunk" &&
+              parsedChunk.value.state === "complete"
+            ) {
+              completeObject = parsedChunk.value.output;
+              break; // Exit the loop when complete object is found
+            }
+          } catch (error) {
+            console.error("Failed to parse JSON:", error);
+          }
+        }
 
-    if (tokenInData.id === WRAP_NEAR_CONTRACT_ID) {
-      transactionsRef.splice(-1, 0, nearDepositTransaction(quantity));
-    }
+        // Check if a complete object was found
+        if (completeObject) {
+          return {
+            Supervisor: completeObject.Supervisor,
+            Receiver: completeObject.Receiver,
+            "Requested Sponsorship Token":
+              completeObject["Requested Sponsorship Token"],
+            proposalDetails: completeObject.new_generation,
+          };
+        } else {
+          return { error: "No complete state found", rawData };
+        }
+      } catch (error) {
+        console.error("Error sending request to API:", error);
+        return { error: "Failed to create proposal" };
+      }
+    },
+  )
+  .get(
+    "/post/devhub/:title/:description/:category/:summary/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor",
+    async ({ params, headers }) => {
+      const transaction = await createProposalTransaction(
+        params,
+        headers,
+        "neardevdao.near",
+        "devhub.near",
+      );
+      return transaction;
+    },
+  )
+  .get(
+    "/post/events/:title/:description/:category/:summary/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor",
+    async ({ params, headers }) => {
+      const transaction = await createProposalTransaction(
+        params,
+        headers,
+        "events-committee.near",
+        "events-committee.near",
+      );
+      return transaction;
+    },
+  )
+  .get(
+    "/post/infrastructure/:title/:description/:category/:summary/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor",
+    async ({ params, headers }) => {
+      const transaction = await createProposalTransaction(
+        { ...params, linkedRfp: undefined },
+        headers,
+        "infrastructure-committee.near",
+        "infrastructure-committee.near",
+      );
+      return transaction;
+    },
+  )
+  .get(
+    "/create/project/:projectDetails/:discord/:medium/:twitter/:logo/:websiteLink/:whitepaper",
+    async ({ params }) => {
+      const {
+        projectDetails,
+        discord,
+        medium,
+        twitter,
+        logo,
+        websiteLink,
+        whitepaper,
+      } = params;
 
-    if (tokenOutData.id === WRAP_NEAR_CONTRACT_ID) {
-      const outEstimate = getExpectedOutputFromSwapTodos(swapTodos, tokenOutData.id);
+      const requestData = {
+        inputs: {
+          "project details": projectDetails,
+          discord: discord,
+          medium: medium,
+          twitter: twitter,
+          logo: logo,
+          website: websiteLink,
+          whitepaper,
+        },
+        version: "^2.0",
+      };
 
-      const routes = separateRoutes(swapTodos, tokenOutData.id);
+      try {
+        const response = await axios.post(
+          "https://app.wordware.ai/api/released-app/3fa70666-cda8-4f47-8d34-2c5618ec92f7/run",
+          requestData,
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.WORDWARE_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+        const rawData = response.data;
 
-      const bigEstimate = routes.reduce((acc, cur) => {
-        const curEstimate = Big(cur[cur.length - 1].estimate);
-        return acc.add(curEstimate);
-      }, outEstimate);
+        // Split the response into lines and filter out empty lines
+        const lines = rawData.split("\n").filter((line: any) => line.trim());
+        let completeObject = null;
 
-      const minAmountOut = percentLess(0.01, scientificNotationToString(bigEstimate.toString()));
+        // Parse each line
+        for (const line of lines) {
+          try {
+            const parsedChunk = JSON.parse(line);
+            if (
+              parsedChunk.type === "chunk" &&
+              parsedChunk.value.state === "complete"
+            ) {
+              completeObject = parsedChunk.value.output;
+              break; // Exit the loop when complete object is found
+            }
+          } catch (error) {
+            console.error("Failed to parse JSON:", error);
+          }
+        }
 
-      transactionsRef.push(nearWithdrawTransaction(minAmountOut));
-    }
-
-    return transactionsRef;
-  })
+        // Check if a complete object was found
+        if (completeObject) {
+          return {
+            discord: completeObject.discord,
+            medium: completeObject.medium,
+            twitter: completeObject.twitter,
+            logo: completeObject.logo,
+            website: completeObject.websiteLink,
+            whitepaper: completeObject.whitepaper,
+            project: completeObject.new_generation,
+          };
+        }
+      } catch (error) {
+        console.error("Error sending request to API:", error);
+        return { error: "Failed to create project" };
+      }
+    },
+  )
+  .get(
+    "/post/nearcatalog/{title}/{description}/{categories}/{oneliner}/{logo}/{website}/{dapp}/{twitter}/{medium}/{discord}/{whitepaper}",
+    async ({ params, headers }) => {
+      const mbMetadata = JSON.parse(headers["mb-metadata"] || "{}");
+      const accountId = mbMetadata?.accountData?.accountId || "near";
+      const {
+        title,
+        description,
+        categories,
+        oneliner,
+        logo,
+        website,
+        twitter,
+        medium,
+        discord,
+        whitepaper,
+      } = params;
+      return await createProject(
+        {
+          [accountId]: {
+            nearcatalog: {
+              categories,
+              title,
+              oneliner,
+              logo,
+              description,
+              website,
+              dapp: "",
+              twitter,
+              medium,
+              discord,
+              whitepaper,
+              tokenAddress: "",
+              cgcAddress: "",
+              uid: accountId,
+            },
+          },
+        },
+        headers,
+      );
+    },
+  )
   .compile();
 
 export const GET = app.handle;

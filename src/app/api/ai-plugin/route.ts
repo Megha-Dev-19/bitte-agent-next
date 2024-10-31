@@ -15,8 +15,9 @@ export async function GET() {
   const pluginData = {
     openapi: "3.0.0",
     info: {
-      title: "RefFinance API",
-      description: "API for retrieving token metadata and swapping tokens through RefFinance.",
+      title: "Project and Proposal Gateway API",
+      description:
+        "API for creating and managing projects and proposals, you can generate a proposal and post it on devhub, events or infrastructure portal to get sponsorship or create a project and add it to the near catalog.",
       version: "1.0.0",
     },
     servers: [
@@ -27,190 +28,112 @@ export async function GET() {
     "x-mb": {
       "account-id": key.accountId || "",
       assistant: {
-        name: "RefFinance Agent",
-        description: "An assistant that provides token metadata and swaps tokens through RefFinance.",
-        instructions: "Get information for a given fungible token or swaps one token for another.",
-        "tools": [{ type: "generate-transaction" }]
+        name: "Project and Proposal Agent",
+        description:
+          "Facilitates the creation and submission of projects and proposals for various sponsorship opportunities.",
+        instructions:
+          "Use this API to submit project details and sponsorship requests to the relevant portals.",
+        tools: [{ type: "generate-transaction" }],
       },
     },
     paths: {
-      "/api/{token}": {
-        get: {
-          tags: ["token", "ft", "metadata"],
-          summary: "Get token metadata from RefFinance",
-          description: "This endpoint returns basic token metadata from RefFinance.",
-          operationId: "get-token-metadata",
-          parameters: [
-            {
-              name: "token",
-              in: "path",
-              description: "The symbol of the token to get metadata for.",
-              required: true,
-              schema: {
-                type: "string",
-              },
-              example: "USDT",
-            },
-          ],
-          responses: {
-            "200": {
-              description: "Successful response",
-              content: {
-                "application/json": {
-                  schema: {
-                    type: "object",
-                    properties: {
-                      id: {
-                        type: "string",
-                      },
-                      name: {
-                        type: "string",
-                      },
-                      symbol: {
-                        type: "string",
-                      },
-                      decimals: {
-                        type: "number",
-                      },
-                      icon: {
-                        type: "string",
-                      },
-                    },
-                  },
+      "/api/create/proposal/{projectDetails}/{requestedSponsorshipAmount}/{requestedSponsorshipToken}/{receiverAccount}/{supervisor}":
+        {
+          get: {
+            description:
+              "Create a detailed proposal with specified details and sponsorship.",
+            operationId: "createProposal",
+            parameters: [
+              {
+                in: "path",
+                name: "projectDetails",
+                required: true,
+                schema: {
+                  type: "string",
                 },
+                description: "Details of the project for the proposal.",
               },
-            },
-            "400": {
-              description: "Bad request",
-              content: {
-                "application/json": {
-                  schema: {
-                    type: "object",
-                    properties: {
-                      error: {
-                        type: "string",
-                      },
-                    },
-                  },
+              {
+                in: "path",
+                name: "requestedSponsorshipAmount",
+                required: true,
+                schema: {
+                  type: "string",
                 },
+                description: "Amount of sponsorship requested.",
               },
-            },
-          },
-        },
-      },
-      "/api/swap/{tokenIn}/{tokenOut}/{quantity}": {
-        get: {
-          tags: ["token", "swap", "ft"],
-          summary: "Swap fungible tokens through RefFinance",
-          description: "Swap an amount of a given fungible token for an amount of another fungible token that equals in value.",
-          operationId: "get-swap-tokens",
-          parameters: [
-            {
-              name: "tokenIn",
-              in: "path",
-              description: "The symbol of the token given to swap.",
-              required: true,
-              schema: {
-                type: "string",
+              {
+                in: "path",
+                name: "requestedSponsorshipToken",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "Token for the requested sponsorship.",
               },
-              example: "USDT"
-            },
-            {
-              name: "tokenOut",
-              in: "path",
-              description: "The symbol of the wanted token to swap.",
-              required: true,
-              schema: {
-                type: "string",
+              {
+                in: "path",
+                name: "receiverAccount",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "NEAR account that will receive the sponsorship.",
               },
-              example: "NEAR"
-            },
-            {
-              name: "quantity",
-              in: "path",
-              description: "The amount of the given token to swap for the wanted token.",
-              required: true,
-              schema: {
-                type: "string",
+              {
+                in: "path",
+                name: "supervisor",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description:
+                  "NEAR account of supervisor responsible for the proposal.",
               },
-              example: "150"
-            }
-          ],
-          responses: {
-            "200": {
-              description: "Successful response",
-              content: {
-                "application/json": {
-                  schema: {
-                    type: "array",
-                    items: {
+            ],
+            responses: {
+              "200": {
+                description: "Proposal created successfully.",
+                content: {
+                  "application/json": {
+                    schema: {
                       type: "object",
                       properties: {
-                        "receiverId": {
+                        Supervisor: {
                           type: "string",
-                          description: "The account ID of the contract that will receive the transaction."
+                          description: "The supervisor's name or ID.",
                         },
-                        "functionCalls": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "methodName": {
-                                "type": "string",
-                                "description": "The name of the method to be called on the contract."
-                              },
-                              "args": {
-                                "type": "object",
-                                "description": "Arguments for the function call.",
-                                "properties": {
-                                  "registration_only": {
-                                    "type": "boolean"
-                                  },
-                                  "account_id": {
-                                    "type": "string"
-                                  },
-                                  "receiver_id": {
-                                    "type": "string"
-                                  },
-                                  "amount": {
-                                    "type": "string"
-                                  },
-                                  "msg": {
-                                    "type": "string",
-                                    "description": "A JSON string containing swap actions and parameters. Shows minimum amount of tokens to receive."
-                                  }
-                                },
-                                "additionalProperties": true
-                              },
-                              "gas": {
-                                "type": "string",
-                                "description": "The amount of gas to attach to the transaction, in yoctoNEAR."
-                              },
-                              "amount": {
-                                "type": "string",
-                                "description": "The amount of NEAR tokens to attach to the transaction, in yoctoNEAR."
-                              }
+                        Receiver: {
+                          type: "string",
+                          description: "The receiver's name or ID.",
+                        },
+                        "Requested Sponsorship Token": {
+                          type: "string",
+                          description: "The token requested for sponsorship.",
+                        },
+                        proposalDetails: {
+                          type: "object",
+                          description: "Details of the proposal.",
+                          properties: {
+                            title: {
+                              type: "string",
+                              description: "Title of the proposal.",
                             },
-                            "required": ["methodName", "args", "gas", "amount"]
-                          }
-                        }
+                            description: {
+                              type: "string",
+                              description:
+                                "Detailed description of the proposal.",
+                            },
+                            // Add other properties of new_generation as needed
+                          },
+                        },
                       },
-                      "required": ["receiverId", "functionCalls"]
-                    }
-                  }
-                }
-              },
-            },
-            "400": {
-              description: "Bad request",
-              content: {
-                "application/json": {
-                  schema: {
-                    type: "object",
-                    properties: {
-                      error: {
-                        type: "string",
-                      },
+                      required: [
+                        "Supervisor",
+                        "Receiver",
+                        "Requested Sponsorship Token",
+                        "proposalDetails",
+                      ],
                     },
                   },
                 },
@@ -218,7 +141,913 @@ export async function GET() {
             },
           },
         },
-      }
+      "/api/post/devhub/{title}/{description}/{category}/{summary}/{requestedSponsorshipAmount}/{requestedSponsorshipToken}/{receiverAccount}/{supervisor}":
+        {
+          get: {
+            description:
+              "Submits a proposal with the specified details to the DevHub portal.",
+            operationId: "postOnDevhub",
+            parameters: [
+              {
+                name: "title",
+                in: "path",
+                required: true,
+                description: "The title of the proposal.",
+                schema: {
+                  type: "string",
+                },
+              },
+              {
+                name: "description",
+                in: "path",
+                required: true,
+                description: "A detailed description of the proposal.",
+                schema: {
+                  type: "string",
+                },
+              },
+              {
+                name: "category",
+                in: "path",
+                required: true,
+                description: "The category under which the proposal falls.",
+                schema: {
+                  type: "string",
+                },
+              },
+              {
+                name: "summary",
+                in: "path",
+                required: true,
+                description: "A brief summary of the proposal.",
+                schema: {
+                  type: "string",
+                },
+              },
+              {
+                name: "requestedSponsorshipAmount",
+                in: "path",
+                required: true,
+                description: "The amount of sponsorship requested.",
+                schema: {
+                  type: "number",
+                },
+              },
+              {
+                name: "requestedSponsorshipToken",
+                in: "path",
+                required: true,
+                description: "The token requested for sponsorship.",
+                schema: {
+                  type: "string",
+                },
+              },
+              {
+                name: "receiverAccount",
+                in: "path",
+                required: true,
+                description: "The account of the receiver.",
+                schema: {
+                  type: "string",
+                },
+              },
+              {
+                name: "supervisor",
+                in: "path",
+                required: true,
+                description: "The account of the supervisor.",
+                schema: {
+                  type: "string",
+                },
+              },
+            ],
+            responses: {
+              "200": {
+                description: "Transaction data generated successfully.",
+                content: {
+                  "application/json": {
+                    schema: {
+                      type: "object",
+                      properties: {
+                        signerId: {
+                          type: "string",
+                          description:
+                            "The account ID that should sign this transaction.",
+                        },
+                        publicKey: {
+                          type: "string",
+                          description:
+                            "The public key associated with the signer account.",
+                        },
+                        nonce: {
+                          type: "string",
+                          description:
+                            "A unique number to ensure the uniqueness of the transaction.",
+                        },
+                        receiverId: {
+                          type: "string",
+                          description:
+                            "The account ID of the DAO contract that will receive this transaction.",
+                        },
+                        actions: {
+                          type: "array",
+                          description:
+                            "The list of actions to be performed in this transaction.",
+                          items: {
+                            type: "object",
+                            properties: {
+                              functionCall: {
+                                type: "object",
+                                properties: {
+                                  methodName: {
+                                    type: "string",
+                                    description:
+                                      "The name of the contract method to be called.",
+                                  },
+                                  args: {
+                                    type: "object",
+                                    properties: {
+                                      type: {
+                                        type: "string",
+                                        description:
+                                          "The type of the arguments data.",
+                                      },
+                                      data: {
+                                        type: "array",
+                                        items: {
+                                          type: "integer",
+                                        },
+                                        description:
+                                          "The encoded arguments for the function call.",
+                                      },
+                                    },
+                                  },
+                                  gas: {
+                                    type: "string",
+                                    description:
+                                      "The amount of gas attached to this function call.",
+                                  },
+                                  deposit: {
+                                    type: "string",
+                                    description:
+                                      "The amount of NEAR tokens attached to this function call.",
+                                  },
+                                },
+                              },
+                              enum: {
+                                type: "string",
+                                description:
+                                  "The type of action being performed.",
+                              },
+                            },
+                          },
+                        },
+                        blockHash: {
+                          type: "object",
+                          additionalProperties: {
+                            type: "integer",
+                          },
+                          description:
+                            "The hash of the block used as a reference for this transaction.",
+                        },
+                      },
+                      required: [
+                        "signerId",
+                        "publicKey",
+                        "nonce",
+                        "receiverId",
+                        "actions",
+                        "blockHash",
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      "/api/post/events/{title}/{description}/{category}/{summary}/{requestedSponsorshipAmount}/{requestedSponsorshipToken}/{receiverAccount}/{supervisor}":
+        {
+          get: {
+            description:
+              "Submits a proposal to the events portal.",
+            operationId: "postOnEvents",
+            parameters: [
+              {
+                in: "path",
+                name: "title",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "The title of the event proposal.",
+              },
+              {
+                in: "path",
+                name: "description",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "A detailed description of the event.",
+              },
+              {
+                in: "path",
+                name: "category",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description:
+                  "The category under which the event proposal falls.",
+              },
+              {
+                in: "path",
+                name: "summary",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "A brief summary of the event proposal.",
+              },
+              {
+                in: "path",
+                name: "requestedSponsorshipAmount",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description:
+                  "The amount of sponsorship requested for the event.",
+              },
+              {
+                in: "path",
+                name: "requestedSponsorshipToken",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "The token requested for sponsorship.",
+              },
+              {
+                in: "path",
+                name: "receiverAccount",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description:
+                  "The NEAR account that will receive the sponsorship.",
+              },
+              {
+                in: "path",
+                name: "supervisor",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description:
+                  "NEAR account of the supervisor responsible for the proposal.",
+              },
+            ],
+            responses: {
+              "200": {
+                description: "Transaction data generated successfully.",
+                content: {
+                  "application/json": {
+                    schema: {
+                      type: "object",
+                      properties: {
+                        signerId: {
+                          type: "string",
+                          description:
+                            "The account ID that should sign this transaction.",
+                        },
+                        publicKey: {
+                          type: "string",
+                          description:
+                            "The public key associated with the signer account.",
+                        },
+                        nonce: {
+                          type: "string",
+                          description:
+                            "A unique number to ensure the uniqueness of the transaction.",
+                        },
+                        receiverId: {
+                          type: "string",
+                          description:
+                            "The account ID of the DAO contract that will receive this transaction.",
+                        },
+                        actions: {
+                          type: "array",
+                          description:
+                            "The list of actions to be performed in this transaction.",
+                          items: {
+                            type: "object",
+                            properties: {
+                              functionCall: {
+                                type: "object",
+                                properties: {
+                                  methodName: {
+                                    type: "string",
+                                    description:
+                                      "The name of the contract method to be called.",
+                                  },
+                                  args: {
+                                    type: "object",
+                                    properties: {
+                                      type: {
+                                        type: "string",
+                                        description:
+                                          "The type of the arguments data.",
+                                      },
+                                      data: {
+                                        type: "array",
+                                        items: {
+                                          type: "integer",
+                                        },
+                                        description:
+                                          "The encoded arguments for the function call.",
+                                      },
+                                    },
+                                  },
+                                  gas: {
+                                    type: "string",
+                                    description:
+                                      "The amount of gas attached to this function call.",
+                                  },
+                                  deposit: {
+                                    type: "string",
+                                    description:
+                                      "The amount of NEAR tokens attached to this function call.",
+                                  },
+                                },
+                              },
+                              enum: {
+                                type: "string",
+                                description:
+                                  "The type of action being performed.",
+                              },
+                            },
+                          },
+                        },
+                        blockHash: {
+                          type: "object",
+                          additionalProperties: {
+                            type: "integer",
+                          },
+                          description:
+                            "The hash of the block used as a reference for this transaction.",
+                        },
+                      },
+                      required: [
+                        "signerId",
+                        "publicKey",
+                        "nonce",
+                        "receiverId",
+                        "actions",
+                        "blockHash",
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      "/api/post/infrastructure/{title}/{description}/{category}/{summary}/{requestedSponsorshipAmount}/{requestedSponsorshipToken}/{receiverAccount}/{supervisor}":
+        {
+          get: {
+            description:
+              "Submits a proposal to the infrastructure portal.",
+            operationId: "postOnInfrastructure",
+            parameters: [
+              {
+                in: "path",
+                name: "title",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "The title of the infrastructure proposal.",
+              },
+              {
+                in: "path",
+                name: "description",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "A detailed description of the infrastructure.",
+              },
+              {
+                in: "path",
+                name: "category",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description:
+                  "The category under which the infrastructure proposal falls.",
+              },
+              {
+                in: "path",
+                name: "summary",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "A brief summary of the infrastructure proposal.",
+              },
+              {
+                in: "path",
+                name: "requestedSponsorshipAmount",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description:
+                  "The amount of sponsorship requested for the infrastructure.",
+              },
+              {
+                in: "path",
+                name: "requestedSponsorshipToken",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "The token requested for sponsorship.",
+              },
+              {
+                in: "path",
+                name: "receiverAccount",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description:
+                  "The NEAR account that will receive the sponsorship.",
+              },
+              {
+                in: "path",
+                name: "supervisor",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description:
+                  "NEAR account of the supervisor responsible for the proposal.",
+              },
+            ],
+            responses: {
+              "200": {
+                description: "Transaction data generated successfully.",
+                content: {
+                  "application/json": {
+                    schema: {
+                      type: "object",
+                      properties: {
+                        signerId: {
+                          type: "string",
+                          description:
+                            "The account ID that should sign this transaction.",
+                        },
+                        publicKey: {
+                          type: "string",
+                          description:
+                            "The public key associated with the signer account.",
+                        },
+                        nonce: {
+                          type: "string",
+                          description:
+                            "A unique number to ensure the uniqueness of the transaction.",
+                        },
+                        receiverId: {
+                          type: "string",
+                          description:
+                            "The account ID of the DAO contract that will receive this transaction.",
+                        },
+                        actions: {
+                          type: "array",
+                          description:
+                            "The list of actions to be performed in this transaction.",
+                          items: {
+                            type: "object",
+                            properties: {
+                              functionCall: {
+                                type: "object",
+                                properties: {
+                                  methodName: {
+                                    type: "string",
+                                    description:
+                                      "The name of the contract method to be called.",
+                                  },
+                                  args: {
+                                    type: "object",
+                                    properties: {
+                                      type: {
+                                        type: "string",
+                                        description:
+                                          "The type of the arguments data.",
+                                      },
+                                      data: {
+                                        type: "array",
+                                        items: {
+                                          type: "integer",
+                                        },
+                                        description:
+                                          "The encoded arguments for the function call.",
+                                      },
+                                    },
+                                  },
+                                  gas: {
+                                    type: "string",
+                                    description:
+                                      "The amount of gas attached to this function call.",
+                                  },
+                                  deposit: {
+                                    type: "string",
+                                    description:
+                                      "The amount of NEAR tokens attached to this function call.",
+                                  },
+                                },
+                              },
+                              enum: {
+                                type: "string",
+                                description:
+                                  "The type of action being performed.",
+                              },
+                            },
+                          },
+                        },
+                        blockHash: {
+                          type: "object",
+                          additionalProperties: {
+                            type: "integer",
+                          },
+                          description:
+                            "The hash of the block used as a reference for this transaction.",
+                        },
+                      },
+                      required: [
+                        "signerId",
+                        "publicKey",
+                        "nonce",
+                        "receiverId",
+                        "actions",
+                        "blockHash",
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      "/api/post/project/{projectDetails}/{discord}/{medium}/{twitter}/{logo}/{websiteLink}/{whitepaper}":
+        {
+          get: {
+            description: "Create a detailed project with specified details and links.",
+            operationId: "createProject",
+            parameters: [
+              {
+                in: "path",
+                name: "projectDetails",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "Details of the project.",
+              },
+              {
+                in: "path",
+                name: "discord",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "Link to the project's Discord server.",
+              },
+              {
+                in: "path",
+                name: "medium",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "Link to the project's Medium article.",
+              },
+              {
+                in: "path",
+                name: "twitter",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "Link to the project's Twitter account.",
+              },
+
+              {
+                in: "path",
+                name: "logo",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "Link to the project's logo image.",
+              },
+              {
+                in: "path",
+                name: "websiteLink",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "Link to the project's official website.",
+              },
+              {
+                in: "path",
+                name: "whitepaper",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "Link to the project's whitepaper.",
+              },
+            ],
+            responses: {
+              "200": {
+                description: "Project created successfully.",
+                content: {
+                  "application/json": {
+                    schema: {
+                      type: "object",
+                      properties: {
+                        discord: {
+                          type: "string",
+                          description: "Link to the project's Discord server.",
+                        },
+                        medium: {
+                          type: "string",
+                          description: "Link to the project's Medium article.",
+                        },
+                        twitter: {
+                          type: "string",
+                          description: "Link to the project's Twitter account.",
+                        },
+                        logo: {
+                          type: "string",
+                          description: "Link to the project's logo image.",
+                        },
+                        website: {
+                          type: "string",
+                          description:
+                            "Link to the project's official website.",
+                        },
+                        whitepaper: {
+                          type: "string",
+                          description: "Link to the project's whitepaper.",
+                        },
+                        project: {
+                          type: "object",
+                          description: "Details of the new generation project.",
+                          properties: {
+                            title: {
+                              type: "string",
+                              description: "Title of the project.",
+                            },
+                            description: {
+                              type: "string",
+                              description:
+                                "Detailed description of the project.",
+                            },
+                            oneliner: {
+                              type: "string",
+                              description: "Oneliner of the project.",
+                            },
+                          },
+                        },
+                      },
+                      required: [
+                        "discord",
+                        "medium",
+                        "twitter",
+                        "logo",
+                        "website",
+                        "whitepaper",
+                        "project",
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      "/api/post/nearcatalog/{title}/{description}/{categories}/{oneliner}/{logo}/{website}/{twitter}/{medium}/{discord}/{whitepaper}":
+        {
+          get: {
+            description:
+              "Post a project to NEAR Catalog.",
+            operationId: "postOnNearCatalog",
+            parameters: [
+              {
+                in: "path",
+                name: "title",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "Title of the NEAR catalog project.",
+              },
+              {
+                in: "path",
+                name: "description",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "Description of the NEAR catalog project.",
+              },
+              {
+                in: "path",
+                name: "categories",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description:
+                  "Categories associated with the NEAR catalog project.",
+              },
+              {
+                in: "path",
+                name: "oneliner",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "A brief one-liner about the project.",
+              },
+              {
+                in: "path",
+                name: "logo",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "URL of the project logo.",
+              },
+              {
+                in: "path",
+                name: "website",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "Link to the official website of the project.",
+              },
+              {
+                in: "path",
+                name: "twitter",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "Link to the project's Twitter account.",
+              },
+              {
+                in: "path",
+                name: "medium",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "Link to the Medium article about the project.",
+              },
+              {
+                in: "path",
+                name: "discord",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "Link to the Discord server for the project.",
+              },
+              {
+                in: "path",
+                name: "whitepaper",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+                description: "Link to the whitepaper of the project.",
+              },
+            ],
+            responses: {
+              "200": {
+                description: "Transaction data generated successfully.",
+                content: {
+                  "application/json": {
+                    schema: {
+                      type: "object",
+                      properties: {
+                        signerId: {
+                          type: "string",
+                          description:
+                            "The account ID that should sign this transaction.",
+                        },
+                        publicKey: {
+                          type: "string",
+                          description:
+                            "The public key associated with the signer account.",
+                        },
+                        nonce: {
+                          type: "string",
+                          description:
+                            "A unique number to ensure the uniqueness of the transaction.",
+                        },
+                        receiverId: {
+                          type: "string",
+                          description:
+                            "The account ID of the DAO contract that will receive this transaction.",
+                        },
+                        actions: {
+                          type: "array",
+                          description:
+                            "The list of actions to be performed in this transaction.",
+                          items: {
+                            type: "object",
+                            properties: {
+                              functionCall: {
+                                type: "object",
+                                properties: {
+                                  methodName: {
+                                    type: "string",
+                                    description:
+                                      "The name of the contract method to be called.",
+                                  },
+                                  args: {
+                                    type: "object",
+                                    properties: {
+                                      type: {
+                                        type: "string",
+                                        description:
+                                          "The type of the arguments data.",
+                                      },
+                                      data: {
+                                        type: "array",
+                                        items: {
+                                          type: "integer",
+                                        },
+                                        description:
+                                          "The encoded arguments for the function call.",
+                                      },
+                                    },
+                                  },
+                                  gas: {
+                                    type: "string",
+                                    description:
+                                      "The amount of gas attached to this function call.",
+                                  },
+                                  deposit: {
+                                    type: "string",
+                                    description:
+                                      "The amount of NEAR tokens attached to this function call.",
+                                  },
+                                },
+                              },
+                              enum: {
+                                type: "string",
+                                description:
+                                  "The type of action being performed.",
+                              },
+                            },
+                          },
+                        },
+                        blockHash: {
+                          type: "object",
+                          additionalProperties: {
+                            type: "integer",
+                          },
+                          description:
+                            "The hash of the block used as a reference for this transaction.",
+                        },
+                      },
+                      required: [
+                        "signerId",
+                        "publicKey",
+                        "nonce",
+                        "receiverId",
+                        "actions",
+                        "blockHash",
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
     },
   };
   return NextResponse.json(pluginData);

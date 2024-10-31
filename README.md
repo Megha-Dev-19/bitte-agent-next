@@ -1,8 +1,6 @@
-# Ref Finance DeFi Swap Agent
+# Project and Proposal Gateway Agent
 
-<img src="https://github.com/user-attachments/assets/aa54bac4-30ef-49bb-bac7-732ff561bd95" alt="cover_image" width="0"/>
-
-Ref Finance Agent is a template for creating a Bitte.ai Plugin for facilitating DeFi swaps using Ref Finance. Built using Next.js 14 + Elysia.
+API for creating and managing projects and proposals. You can generate a proposal and post it on the devhub, events, or infrastructure portal to get sponsorship or create a project and add it to the NEAR catalog.
 
 [![Demo](https://img.shields.io/badge/Demo-Visit%20Demo-brightgreen)](https://ref-finance-agent-next.vercel.app/)
 [![Deploy](https://img.shields.io/badge/Deploy-on%20Vercel-blue)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FMintbase%2Fref-finance-agent-next)
@@ -14,28 +12,47 @@ Ref Finance Agent is a template for creating a Bitte.ai Plugin for facilitating 
 
 ## Project Walkthrough
 
-Ref Finance Agent facilitates the development of AI-powered DeFi swap agents. The template supports creating, managing, and deploying DeFi swap functionalities. [Build your own agent](https://docs.mintbase.xyz/ai/assistant-plugins)
-
-#### API Base URL
-
-https://ref-finance-agent.vercel.app
+Facilitates the creation and submission of projects and proposals for various sponsorship opportunities
 
 #### Endpoints
 
-- Token Metadata `GET` `/api/token/{token}`
+**Create Proposal**
 
-- Swap Transactions `GET` `/api/swap/{tokenIn}/{tokenOut}/{quantity}`
+- **Endpoint:** `/api/create/proposal/:proposalDetails/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor`
+- **Description:** Create a proposal to apply for sponsorship by posting it on the devhub, events, or infrastructure portal.
 
-#### Usage
-Make LLM requests to the endpoints above. Refer to the full API documentation for detailed parameter and response information.
+**Create DevHub Proposal**
 
+- **Endpoint:** `/api/post/devhub/:title/:description/:category/:summary/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor`
+- **Description:** Create a proposal to apply for sponsorship through the devhub.
+
+**Create Events Proposal**
+
+- **Endpoint:** `/api/post/events/:title/:description/:category/:summary/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor`
+- **Description:** Create a proposal for events sponsorship.
+
+**Create Infrastructure Proposal**
+
+- **Endpoint:** `/api/post/infrastructure/:title/:description/:category/:summary/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor`
+- **Description:** Create a proposal for infrastructure sponsorship.
+
+**Create Project**
+
+- **Endpoint:** `/api/create/project/:projectDetails/:discord/:medium/:twitter/:logo/:websiteLink/:whitepaper`
+- **Description:** Create a detailed project.
+
+**Create NEAR Catalogue Project**
+
+- **Endpoint:** `/api/post/nearcatalog/:title/:description/:categories/:oneliner/:logo/:website/:dapp/:twitter/:medium/:discord/:whitepaper`
+- **Description:** Create a NEAR catalogue project entry.
 
 ## Getting Started
-[Docs to integrate](https://docs.mintbase.xyz/ai/assistant-plugins)  
+
+[Docs to integrate](https://docs.mintbase.xyz/ai/assistant-plugins)
 
 ### Installation
 
-Set `NEAR_ENV="mainnet"` in your `.env.local` file.
+Set `NEAR_ENV="mainnet"` in your `.env.local` file, you'll also need to add the `WORDWARE_API_KEY`.
 
 ```bash
 # install dependencies
@@ -44,16 +61,3 @@ pnpm i
 # start the development server
 pnpm dev
 ```
-
-## Demo
-https://github.com/Mintbase/ref-finance-agent-next/assets/838839/3291eaf9-aa79-4c95-8c5f-673a6d72dc96
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
-
-<img src="https://i.imgur.com/fgFX6BS.png" alt="detail_image" width="0"/>
-
-
