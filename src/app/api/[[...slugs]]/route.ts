@@ -174,7 +174,7 @@ const app = new Elysia({ prefix: "/api", aot: false })
 
         // Check if a complete object was found
         if (completeObject) {
-          console.log(completeObject)
+          console.log(completeObject);
           return {
             discord: completeObject.discord,
             medium: completeObject.medium,

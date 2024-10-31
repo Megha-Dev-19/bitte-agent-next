@@ -43,7 +43,8 @@ export async function GET() {
         {
           get: {
             description:
-              "Create a detailed proposal with specified details and sponsorship.",
+              "Create a proposal with specified details and sponsorship.",
+            tags: ["create proposal"],
             operationId: "createProposal",
             parameters: [
               {
@@ -717,6 +718,7 @@ export async function GET() {
           get: {
             description:
               "Create a detailed project with specified details and links.",
+            tags: ["create project"],
             operationId: "createProject",
             parameters: [
               {
