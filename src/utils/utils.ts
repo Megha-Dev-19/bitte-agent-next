@@ -1,32 +1,5 @@
 const { JsonRpcProvider } = require("@near-js/providers");
-import { transactions, utils } from "near-api-js";
 import BN from "bn.js";
-
-export async function getBlockDetails(): Promise<{
-  blockHash: string;
-  blockHeight: number;
-}> {
-  const provider = new JsonRpcProvider({ url: "https://rpc.near.org" });
-  const { sync_info } = await provider.status();
-  return {
-    blockHash: sync_info.latest_block_hash,
-    blockHeight: sync_info.latest_block_height,
-  };
-}
-
-export async function fetchNonce(
-  accountId: string,
-  publicKey: utils.key_pair.PublicKey,
-): Promise<number> {
-  const provider = new JsonRpcProvider({ url: "https://rpc.near.org" });
-  const rawAccessKey = await provider.query({
-    request_type: "view_access_key",
-    account_id: accountId,
-    public_key: publicKey.toString(),
-    finality: "optimistic",
-  });
-  return rawAccessKey.nonce;
-}
 
 export async function fetchNearView(
   accountId: string,
@@ -63,20 +36,19 @@ interface InfrastructureParams extends BaseProposalParams {
   linkedRfp?: string; // Optional linked RFP object
 }
 
+interface TransactionResponse {
+  methodName: string;
+  args: any;
+  gas: string;
+  deposit: string;
+  contractName: string;
+}
+
 export async function createProposalTransaction(
   params: BaseProposalParams | InfrastructureParams,
-  headers: any,
   requestedSponsor: string,
   contract: string,
-): Promise<transactions.Transaction> {
-  const config = JSON.parse(process.env.BITTE_KEY || "{}");
-  const accountId = config.accountId;
-  const publicKey = config?.publicKey || "";
-
-  // const mbMetadata = JSON.parse(headers["mb-metadata"] || "{}");
-  // const accountId = mbMetadata?.accountData?.accountId || "near";
-  // const publicKey = mbMetadata?.accountData?.devicePublicKey || "";
-
+): Promise<TransactionResponse> {
   const {
     title,
     description,
@@ -134,62 +106,21 @@ export async function createProposalTransaction(
     };
   }
 
-  const nonce = await fetchNonce(accountId, publicKey);
-  const blockDetails = await getBlockDetails();
-
-  const actions: transactions.Action[] = [];
-  actions.push(
-    transactions.functionCall(
-      "add_proposal",
-      args,
-      new BN("200000000000000"), // Gas limit
-      new BN("0"), // Attached deposit
-    ),
-  );
-
-  const transaction = transactions.createTransaction(
-    accountId,
-    publicKey,
-    contract,
-    nonce,
-    actions,
-    utils.serialize.base_decode(blockDetails.blockHash),
-  );
-
-  return transaction;
+  return {
+    methodName: "add_proposal",
+    args: args,
+    gas: "50000000000000",
+    deposit: "0",
+    contractName: contract,
+  };
 }
 
-export async function createProject(
-  args: any,
-  headers: any,
-): Promise<transactions.Transaction> {
-  const config = JSON.parse(process.env.BITTE_CONFIG || "{}");
-  const accountId = config.accountId;
-  const publicKey = config?.publicKey || "";
-  // const mbMetadata = JSON.parse(headers["mb-metadata"] || "{}");
-  // const accountId = mbMetadata?.accountData?.accountId || "near";
-  // const publicKey = mbMetadata?.accountData?.devicePublicKey || "";
-  const nonce = await fetchNonce(accountId, publicKey);
-  const blockDetails = await getBlockDetails();
-
-  const actions: transactions.Action[] = [];
-  actions.push(
-    transactions.functionCall(
-      "set",
-      args,
-      new BN("200000000000000"), // Gas limit
-      new BN("100000000000000000000000"), // Attached deposit
-    ),
-  );
-
-  const transaction = transactions.createTransaction(
-    accountId,
-    publicKey,
-    "social.near",
-    nonce,
-    actions,
-    utils.serialize.base_decode(blockDetails.blockHash),
-  );
-
-  return transaction;
+export async function createProject(args: any): Promise<TransactionResponse> {
+  return {
+    methodName: "set",
+    args: args,
+    gas: "50000000000000",
+    deposit: "0",
+    contractName: "social.near",
+  };
 }

@@ -22,9 +22,7 @@ export async function GET() {
     },
     servers: [
       {
-        url:
-          config?.url ||
-          "https://project-proposal-bitte-agent.vercel.app/",
+        url: config?.url || "https://project-proposal-bitte-agent.vercel.app/",
       },
     ],
     "x-mb": {
@@ -147,8 +145,10 @@ export async function GET() {
       "/api/get/transaction/devhub/{title}/{description}/{category}/{summary}/{requestedSponsorshipAmount}/{requestedSponsorshipToken}/{receiverAccount}/{supervisor}":
         {
           get: {
+            summary:
+              "Generate a transaction that contains a proposal with the specified details to the DevHub portal.",
             description:
-              "Creates a NEAR transaction payload to sign by user, it contains a proposal with the specified details to the DevHub portal.",
+              "Returns a transaction that contains a proposal with the specified details to the DevHub portal.",
             operationId: "getDevhubTransaction",
             tags: ["Devhub portal"],
             parameters: [
@@ -228,7 +228,7 @@ export async function GET() {
             responses: {
               "200": {
                 description:
-                  "Use this transaction data to call generate-transaction tool to generate a transaction.",
+                  "The transaction that contains a proposal with the specified details to the DevHub portal.",
                 content: {
                   "application/json": {
                     schema: {
@@ -334,8 +334,10 @@ export async function GET() {
       "/api/get/transaction/events/{title}/{description}/{category}/{summary}/{requestedSponsorshipAmount}/{requestedSponsorshipToken}/{receiverAccount}/{supervisor}":
         {
           get: {
+            summary:
+              "Generate a transaction that contains a proposal with the specified details to the Events portal.",
             description:
-              "Creates a NEAR transaction payload to sign by user, it contains a proposal with the specified details to the Events portal.",
+              "Generate a transaction that contains a proposal with the specified details to the Events portal.",
             tags: ["Events portal"],
             operationId: "getEventsTransaction",
             parameters: [
@@ -419,7 +421,7 @@ export async function GET() {
             responses: {
               "200": {
                 description:
-                  "Use this transaction data to call generate-transaction tool to generate a transaction.",
+                  "The transaction that contains a proposal with the specified details to the Events portal.",
                 content: {
                   "application/json": {
                     schema: {
@@ -525,8 +527,10 @@ export async function GET() {
       "/api/get/transaction/infrastructure/{title}/{description}/{category}/{summary}/{requestedSponsorshipAmount}/{requestedSponsorshipToken}/{receiverAccount}/{supervisor}":
         {
           get: {
+            summary:
+              "Generate a transaction that contains a proposal with the specified details to the Infrastructure portal.",
             description:
-              "Creates a NEAR transaction payload to sign by user, it contains a proposal with the specified details to the Infrastructure portal.",
+              "Generate a transaction that contains a proposal with the specified details to the Infrastructure portal.",
             tags: ["Infrastructure portal"],
             operationId: "getInfrastructureTransaction",
             parameters: [
@@ -610,7 +614,7 @@ export async function GET() {
             responses: {
               "200": {
                 description:
-                  "Use this transaction data to call generate-transaction tool to generate a transaction.",
+                  "The transaction that contains a proposal with the specified details to the Infrastructure portal.",
                 content: {
                   "application/json": {
                     schema: {
@@ -716,8 +720,7 @@ export async function GET() {
       "/api/create/project/{projectDetails}/{discord}/{medium}/{twitter}/{logo}/{websiteLink}/{whitepaper}":
         {
           get: {
-            description:
-              "Create a project with specified details and links.",
+            description: "Create a project with specified details and links.",
             tags: ["create project"],
             operationId: "createProject",
             parameters: [
@@ -858,7 +861,10 @@ export async function GET() {
       "/api/get/transaction/nearcatalog/{title}/{description}/{categories}/{oneliner}/{logo}/{website}/{twitter}/{medium}/{discord}/{whitepaper}":
         {
           get: {
-            description: "Post a project to NEAR Catalog.",
+            summary:
+              "Generate a transaction that contains a project to NEAR Catalog.",
+            description:
+              "Generate a transaction that contains a project to NEAR Catalog.",
             tags: ["NEAR Catalog"],
             operationId: "getNearCatalogTransaction",
             parameters: [
@@ -957,7 +963,7 @@ export async function GET() {
             responses: {
               "200": {
                 description:
-                  "Use this transaction data to call generate-transaction tool to generate a transaction.",
+                  "The transaction that contains a project to NEAR Catalog.",
                 content: {
                   "application/json": {
                     schema: {

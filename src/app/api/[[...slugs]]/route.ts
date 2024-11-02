@@ -79,22 +79,20 @@ const app = new Elysia({ prefix: "/api", aot: false })
   )
   .get(
     "/get/transaction/devhub/:title/:description/:category/:summary/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor",
-    async ({ params, headers }) => {
+    async ({ params }) => {
       const transaction = await createProposalTransaction(
         params,
-        headers,
         "neardevdao.near",
         "devhub.near",
       );
-      return JSON.stringify(transaction);
+      return transaction;
     },
   )
   .get(
     "/get/transaction/events/:title/:description/:category/:summary/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor",
-    async ({ params, headers }) => {
+    async ({ params }) => {
       const transaction = await createProposalTransaction(
         params,
-        headers,
         "events-committee.near",
         "events-committee.near",
       );
@@ -103,10 +101,9 @@ const app = new Elysia({ prefix: "/api", aot: false })
   )
   .get(
     "/get/transaction/infrastructure/:title/:description/:category/:summary/:requestedSponsorshipAmount/:requestedSponsorshipToken/:receiverAccount/:supervisor",
-    async ({ params, headers }) => {
+    async ({ params }) => {
       const transaction = await createProposalTransaction(
         { ...params, linkedRfp: undefined },
-        headers,
         "infrastructure-committee.near",
         "infrastructure-committee.near",
       );
@@ -214,29 +211,26 @@ const app = new Elysia({ prefix: "/api", aot: false })
           decodeURIComponent(value as any),
         ]),
       );
-      return await createProject(
-        {
-          [accountId]: {
-            nearcatalog: {
-              categories,
-              title,
-              oneliner,
-              logo,
-              description,
-              website,
-              dapp: "",
-              twitter,
-              medium,
-              discord,
-              whitepaper,
-              tokenAddress: "",
-              cgcAddress: "",
-              uid: accountId,
-            },
+      return await createProject({
+        [accountId]: {
+          nearcatalog: {
+            categories,
+            title,
+            oneliner,
+            logo,
+            description,
+            website,
+            dapp: "",
+            twitter,
+            medium,
+            discord,
+            whitepaper,
+            tokenAddress: "",
+            cgcAddress: "",
+            uid: accountId,
           },
         },
-        headers,
-      );
+      });
     },
   )
   .compile();
