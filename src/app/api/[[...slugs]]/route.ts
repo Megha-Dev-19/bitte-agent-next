@@ -193,7 +193,7 @@ const app = new Elysia({ prefix: "/api", aot: false })
       // const mbMetadata = JSON.parse(headers["mb-metadata"] || "{}");
       // const accountId = mbMetadata?.accountData?.accountId || "near";
       const config = JSON.parse(process.env.BITTE_KEY || "{}");
-      const accountId = config.accountId;
+      const accountId = config.accountId || "near";
       const {
         title,
         description,
